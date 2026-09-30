@@ -65,7 +65,8 @@ async function handleStripeEvent(event: StripeEventJob): Promise<void> {
   switch (event.type) {
     case 'checkout.session.completed': {
       const metadata = (object.metadata ?? {}) as Record<string, unknown>;
-      const workspaceId = idOf(object.client_reference_id) ?? idOf(metadata.workspaceId);
+      const workspaceId =
+        idOf(object.client_reference_id) ?? idOf(metadata.workspace_id) ?? idOf(metadata.workspaceId);
       if (!workspaceId || !UUID.test(workspaceId)) {
         console.warn(`[worker] ${event.id}: checkout session without a workspace reference, ignored`);
         return;
