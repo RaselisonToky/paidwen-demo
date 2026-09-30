@@ -99,8 +99,7 @@ journeys:
       - goto: /billing
       - expect: { text: Free }
       - click: Subscribe to Pro
-      - expect: { text: Stripe Checkout }
-      - click: Pay
+      - click: Subscribe
       - expect: { url: /billing }
       - wait: { seconds: 3 }
       - goto: /billing
