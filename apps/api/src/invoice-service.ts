@@ -35,7 +35,21 @@ export async function createInvoice(executor: DbExecutor, workspaceId: string, i
   return invoice.id;
 }
 
-export async function listInvoices(workspaceId: string, order: 'newest' | 'oldest'): Promise<InvoiceSummaryDto[]> {
+export type InvoiceOrder = 'newest' | 'oldest' | 'amount';
+
+function ordering(order: InvoiceOrder) {
+  if (order === 'amount') {
+    return [desc(invoices.totalCents), desc(invoices.number)];
+  }
+  return order === 'newest' ? [desc(invoices.number)] : [asc(invoices.number)];
+}
+
+export async function countInvoices(workspaceId: string): Promise<number> {
+  const [row] = await db.select({ count: count() }).from(invoices).where(eq(invoices.workspaceId, workspaceId));
+  return row?.count ?? 0;
+}
+
+export async function listInvoices(workspaceId: string, order: InvoiceOrder, limit = 10_000, offset = 0): Promise<InvoiceSummaryDto[]> {
   const rows = await db
     .select({
       id: invoices.id,
@@ -48,7 +62,9 @@ export async function listInvoices(workspaceId: string, order: 'newest' | 'oldes
     .from(invoices)
     .innerJoin(clients, eq(invoices.clientId, clients.id))
     .where(eq(invoices.workspaceId, workspaceId))
-    .orderBy(order === 'newest' ? desc(invoices.number) : asc(invoices.number));
+    .orderBy(...ordering(order))
+    .limit(limit)
+    .offset(offset);
   return rows.map((row) => ({ ...row, status: row.status as InvoiceStatus }));
 }
 

@@ -1,92 +1,46 @@
-# Workflow de la phase 1, posé dans le dépôt de démonstration : il télécharge le moteur chiffré
-# publié en release "engine-dev" de ce même dépôt, vérifie la PR, range la vidéo en artefact et
-# pose le verdict avec le jeton du workflow. La phase 2 remplace ce canal par l'application
-# GitHub et le workflow réutilisable de Paidwen.
 name: Paidwen
+run-name: "Paidwen verification of pull request #${{ inputs.pr }}"
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      verification:
+        description: Verification
+        type: string
+        required: true
+      pr:
+        description: Pull request
+        type: string
+        required: true
+      head:
+        description: Head commit
+        type: string
+        required: true
+      base:
+        description: Base commit
+        type: string
+        required: true
+      environment:
+        description: Environment
+        type: choice
+        options:
+          - paidwen
+          - paidwen-fork
+        required: true
+      api:
+        description: Paidwen API
+        type: string
+        required: true
 permissions:
   contents: read
-  pull-requests: write
-  statuses: write
-concurrency:
-  group: paidwen-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
+  id-token: write
 jobs:
   verify:
-    if: github.event.pull_request.draft == false
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-      - name: Download the Paidwen engine
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PAIDWEN_ENGINE_KEY: ${{ secrets.PAIDWEN_ENGINE_KEY }}
-        run: |
-          set -e
-          dir="$RUNNER_TEMP/paidwen"
-          mkdir -p "$dir/engine"
-          gh release download engine-dev -R "$GITHUB_REPOSITORY" -p engine.tgz.enc -D "$dir" --clobber
-          node -e '
-            const c = require("node:crypto"), f = require("node:fs");
-            const dir = process.argv[1];
-            const b = f.readFileSync(dir + "/engine.tgz.enc");
-            const k = Buffer.from(process.env.PAIDWEN_ENGINE_KEY, "hex");
-            const d = c.createDecipheriv("aes-256-gcm", k, b.subarray(0, 12));
-            d.setAuthTag(b.subarray(12, 28));
-            f.writeFileSync(dir + "/engine.tgz", Buffer.concat([d.update(b.subarray(28)), d.final()]));
-          ' "$dir"
-          tar -xzf "$dir/engine.tgz" -C "$dir/engine"
-          echo "engine $(node -e 'console.log(require(process.argv[1] + "/engine/package.json").version)' "$dir")"
-      - name: Verify the pull request
-        env:
-          PAIDWEN_ENV: ${{ secrets.PAIDWEN_ENV }}
-          PAIDWEN_TEST_LOGIN: ${{ secrets.PAIDWEN_TEST_LOGIN }}
-          PAIDWEN_TEST_PASSWORD: ${{ secrets.PAIDWEN_TEST_PASSWORD }}
-        run: |
-          node "$RUNNER_TEMP/paidwen/engine/host.mjs" verify \
-            repo="$GITHUB_WORKSPACE" \
-            base="origin/${{ github.base_ref }}" \
-            head=HEAD \
-            work="$RUNNER_TEMP/paidwen/work" \
-            engine="$RUNNER_TEMP/paidwen/engine" \
-            run_id="pr${{ github.event.pull_request.number }}a${{ github.run_attempt }}"
-      - name: Keep the video and the results
-        id: upload
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: paidwen-verdict-${{ github.event.pull_request.number }}-${{ github.run_attempt }}
-          path: |
-            ${{ runner.temp }}/paidwen/work/shared/verdict.mp4
-            ${{ runner.temp }}/paidwen/work/results.json
-            ${{ runner.temp }}/paidwen/work/engine.log
-            ${{ runner.temp }}/paidwen/work/shared/sidecar.log
-          retention-days: 90
-          if-no-files-found: ignore
-      - name: Post the verdict
-        if: always()
-        env:
-          GH_TOKEN: ${{ github.token }}
-          PAIDWEN_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          PAIDWEN_VIDEO_URL: ${{ steps.upload.outputs.artifact-url }}
-        run: |
-          node "$RUNNER_TEMP/paidwen/engine/host.mjs" report \
-            work="$RUNNER_TEMP/paidwen/work" \
-            pr=${{ github.event.pull_request.number }} \
-            sha=${{ github.event.pull_request.head.sha }}
-      - name: Try to attach the video to the pull request
-        if: always()
-        continue-on-error: true
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          video="$RUNNER_TEMP/paidwen/work/shared/verdict.mp4"
-          if [ -f "$video" ]; then
-            gh pr comment ${{ github.event.pull_request.number }} -R "$GITHUB_REPOSITORY" --body "Paidwen video (attachment experiment)" --attach "$video"
-          fi
+    uses: RaselisonToky/paidwen-action/.github/workflows/verify.yml@v1
+    secrets: inherit
+    with:
+      verification: ${{ inputs.verification }}
+      pr: ${{ inputs.pr }}
+      head: ${{ inputs.head }}
+      base: ${{ inputs.base }}
+      environment: ${{ inputs.environment }}
+      api: ${{ inputs.api }}

@@ -28,7 +28,7 @@ Create the demo data once the stack is up:
 docker compose exec api node dist/seed.js
 ```
 
-This creates a confirmed account with 2 clients and 3 invoices:
+This creates a confirmed account with 2 clients and 8 invoices:
 
 - email: `demo@norbill.test`
 - password: `demo-password-123`
@@ -39,7 +39,7 @@ Running the seed again does nothing.
 
 1. Sign up. Fill in the form on `/signup` (Company name, Email, Password). The worker sends a confirmation email with a link to `/confirm?token=...`. Opening the link confirms the account and lands on `/dashboard`, logged in.
 2. Log in. `/login` asks for Email and Password and lands on `/dashboard`. An unconfirmed account gets the message "Confirm your email first". The top bar has a Log out button.
-3. Clients and invoices. `/clients` lists the clients, `/clients/new` creates one (Name, Email). `/invoices` lists the invoices, `/invoices/new` creates one (Client, Date, Tax rate, up to three lines with a description, a quantity and a unit price, and optional notes). The invoice page shows the number, the lines, the subtotal, the tax, the total, the status and the notes when there are any. "Mark as sent" changes the status from Draft to Sent and emails the client.
+3. Clients and invoices. `/clients` lists the clients, `/clients/new` creates one (Name, Email). `/invoices` lists the invoices five per page, newest first, and "Largest first" sorts them by total across all pages. `/invoices/new` creates one (Client, Date, Tax rate, up to three lines with a description, a quantity and a unit price, and optional notes). The invoice page shows the number, the lines, the subtotal, the tax, the total, the status and the notes when there are any. "Mark as sent" changes the status from Draft to Sent and emails the client.
 4. Billing. `/billing` shows the current plan (Free or Pro). "Subscribe to Pro" creates a Stripe Checkout session and sends the browser to Stripe. Stripe calls the webhook, the worker processes the `checkout.session.completed` event and the plan becomes Pro. Without a Stripe key the page says that payments are not configured.
 5. Export. "Export CSV" on `/invoices` downloads `invoices.csv` with one line per invoice: number, client, date, total, status.
 
@@ -74,7 +74,7 @@ Web app (port 3000):
 - Pages: `/signup`, `/login`, `/dashboard`, `/clients`, `/clients/new`, `/invoices`, `/invoices/new`, `/invoices/:id`, `/billing`. `/` redirects to `/dashboard`.
 - Route handlers: `POST /api/signup`, `POST /api/login`, `POST /api/logout`, `GET /confirm?token=...`, `POST /api/clients`, `POST /api/invoices`, `GET /api/invoices/export` (the CSV), `POST /api/invoices/:id/send`, `POST /api/billing/checkout`, `POST /api/webhooks/stripe` (forwarded to the API), `GET /api/health`.
 
-API (port 4000, internal): `GET /health`, `POST /auth/signup`, `POST /auth/confirm`, `POST /auth/login`, `GET /me`, `GET /dashboard`, `GET /clients`, `POST /clients`, `GET /invoices`, `GET /invoices/export`, `POST /invoices`, `GET /invoices/:id`, `POST /invoices/:id/send`, `GET /billing`, `POST /billing/checkout`, `POST /webhooks/stripe`.
+API (port 4000, internal): `GET /health`, `POST /auth/signup`, `POST /auth/confirm`, `POST /auth/login`, `GET /me`, `GET /dashboard`, `GET /clients`, `POST /clients`, `GET /invoices?sort=newest|amount&page=N`, `GET /invoices/export`, `POST /invoices`, `GET /invoices/:id`, `POST /invoices/:id/send`, `GET /billing`, `POST /billing/checkout`, `POST /webhooks/stripe`.
 
 The web app authenticates the browser with a signed, httpOnly session cookie and forwards the user id to the API in the `x-user-id` header. The API is only reachable inside the Docker network, so it trusts that header.
 

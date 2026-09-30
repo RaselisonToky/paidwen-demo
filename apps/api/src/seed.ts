@@ -55,13 +55,43 @@ async function seed(): Promise<void> {
         { description: 'Extra support hours', quantity: 4, unitPriceCents: 9500 },
       ],
     });
+    const fourth = await createInvoice(tx, workspace.id, {
+      clientId: globex.id,
+      issuedAt: '2026-09-24',
+      taxRate: 20,
+      lines: [{ description: 'Logo refresh', quantity: 1, unitPriceCents: 145000 }],
+    });
+    await createInvoice(tx, workspace.id, {
+      clientId: acme.id,
+      issuedAt: '2026-09-25',
+      taxRate: 20,
+      lines: [{ description: 'Newsletter templates', quantity: 3, unitPriceCents: 38000 }],
+    });
+    const sixth = await createInvoice(tx, workspace.id, {
+      clientId: globex.id,
+      issuedAt: '2026-09-26',
+      taxRate: 20,
+      lines: [{ description: 'Data migration', quantity: 1, unitPriceCents: 320000 }],
+    });
+    await createInvoice(tx, workspace.id, {
+      clientId: acme.id,
+      issuedAt: '2026-09-28',
+      taxRate: 0,
+      lines: [{ description: 'Bug fixes, hourly', quantity: 6, unitPriceCents: 9500 }],
+    });
+    await createInvoice(tx, workspace.id, {
+      clientId: globex.id,
+      issuedAt: '2026-09-29',
+      taxRate: 20,
+      lines: [{ description: 'Training session', quantity: 1, unitPriceCents: 90000 }],
+    });
 
-    for (const id of [first, second]) {
+    for (const id of [first, second, fourth, sixth]) {
       await tx.update(invoices).set({ status: 'sent', sentAt: new Date() }).where(eq(invoices.id, id));
     }
   });
 
-  console.log(`Seeded ${DEMO_EMAIL} (password: ${DEMO_PASSWORD}) with 2 clients and 3 invoices.`);
+  console.log(`Seeded ${DEMO_EMAIL} (password: ${DEMO_PASSWORD}) with 2 clients and 8 invoices.`);
 }
 
 seed()
