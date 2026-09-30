@@ -1,0 +1,140 @@
+# Paidwen replays these user journeys on every pull request.
+# Reference: https://paidwen.com/docs/paidwen-yml
+# Add a journey by clicking through the app: npx paidwen record <id> <url>
+# The test account lives in the secrets PAIDWEN_TEST_LOGIN and PAIDWEN_TEST_PASSWORD.
+version: 1
+
+app:
+  compose: docker-compose.yml
+  service: web
+  port: 3000
+  path: /login
+  ready:
+    path: /api/health
+    timeoutSeconds: 300
+  setup:
+    - node dist/seed.js
+  setupService: api
+
+services:
+  email: mailpit
+  stripe: mock
+  stripeWebhookUrl: http://web:3000/api/webhooks/stripe
+  storage: none
+  ai: none
+
+journeys:
+  - id: signup
+    name: Sign up and confirm the email
+    paths:
+      - apps/web/src/app/signup/**
+      - apps/web/src/app/confirm/**
+      - apps/web/src/app/api/signup/**
+      - apps/api/src/auth.ts
+      - apps/api/src/routes/auth.ts
+      - apps/worker/**
+    steps:
+      - goto: /signup
+      - fill: { field: Company name, value: Paidwen Test }
+      - fill: { field: Email, value: "{{email}}" }
+      - fill: { field: Password, value: "{{password}}" }
+      - click: Create account
+      - expect: { text: Check your email }
+      - email: { to: "{{email}}", subject: Confirm, click: confirm }
+      - expect: { url: /dashboard, text: Your email is confirmed }
+
+  - id: login
+    name: Log in with the demo account
+    account: true
+    paths:
+      - apps/web/src/app/login/**
+      - apps/web/src/app/api/login/**
+      - apps/web/src/lib/session.ts
+      - apps/api/src/routes/auth.ts
+    steps:
+      - goto: /login
+      - fill: { field: Email, value: "{{account.email}}" }
+      - fill: { field: Password, value: "{{account.password}}" }
+      - click: Log in
+      - expect: { url: /dashboard, text: "Welcome, Demo Company" }
+
+  - id: invoice
+    name: Create an invoice and mark it as sent
+    account: true
+    paths:
+      - apps/web/src/app/invoices/**
+      - apps/web/src/app/api/invoices/**
+      - apps/api/src/routes/invoices.ts
+      - apps/api/src/invoice-service.ts
+    steps:
+      - goto: /login
+      - fill: { field: Email, value: "{{account.email}}" }
+      - fill: { field: Password, value: "{{account.password}}" }
+      - click: Log in
+      - goto: /invoices/new
+      - select: { field: Client, value: Acme Corporation }
+      - fill: { field: Line 1 description, value: Verification by Paidwen }
+      - fill: { field: Line 1 unit price, value: "120" }
+      - click: Create invoice
+      - expect: { text: Invoice created }
+      - click: Mark as sent
+      - expect: { text: Invoice marked as sent }
+
+  - id: subscribe
+    name: Subscribe to Pro with a test card
+    account: true
+    paths:
+      - apps/web/src/app/billing/**
+      - apps/web/src/app/api/billing/**
+      - apps/web/src/app/api/webhooks/**
+      - apps/api/src/routes/workspace.ts
+      - apps/worker/**
+    steps:
+      - goto: /login
+      - fill: { field: Email, value: "{{account.email}}" }
+      - fill: { field: Password, value: "{{account.password}}" }
+      - click: Log in
+      - goto: /billing
+      - expect: { text: Free }
+      - click: Subscribe to Pro
+      - expect: { text: Stripe Checkout }
+      - click: Pay
+      - expect: { url: /billing }
+      - wait: { seconds: 3 }
+      - goto: /billing
+      - expect: { text: You are on the Pro plan }
+
+  - id: export
+    name: Export the invoices as CSV
+    account: true
+    paths:
+      - apps/web/src/app/api/invoices/export/**
+      - apps/api/src/routes/invoices.ts
+    steps:
+      - goto: /login
+      - fill: { field: Email, value: "{{account.email}}" }
+      - fill: { field: Password, value: "{{account.password}}" }
+      - click: Log in
+      - goto: /invoices
+      - download: { click: Export CSV, name: "*.csv", contains: INV-0001 }
+
+  - id: client
+    name: Create a client
+    account: true
+    paths:
+      - apps/web/src/app/clients/**
+      - apps/web/src/app/api/clients/**
+      - apps/api/src/routes/clients.ts
+    steps:
+      - goto: /login
+      - fill: { field: Email, value: "{{account.email}}" }
+      - fill: { field: Password, value: "{{account.password}}" }
+      - click: Log in
+      - goto: /clients/new
+      - fill: { field: Name, value: Paidwen Client }
+      - fill: { field: Email, value: client@paidwen.test }
+      - click: Create client
+      - expect: { url: /clients, text: Client created }
+
+settings:
+  budgetMinutes: 20
