@@ -86,7 +86,8 @@ test('an unconfirmed account cannot log in', async ({ page }) => {
   await page.getByLabel('Email').fill(email);
   await page.getByLabel('Password').fill('a-strong-password-1');
   await page.getByRole('button', { name: 'Log in' }).click();
-  await expect(page.getByRole('alert')).toHaveText('Confirm your email first.');
+  await expect(page.getByText('Confirm your email first.')).toBeVisible();
+  await expect(page).toHaveURL(/\/login/);
 });
 
 test('the demo account logs in and sees its dashboard', async ({ page }) => {
