@@ -1,5 +1,3 @@
-# Paidwen starts this workflow for each pull request it verifies.
-# Put the Paidwen secrets in the GitHub environment named paidwen of this repository.
 name: Paidwen
 run-name: "Paidwen verification of pull request #${{ inputs.pr }}"
 on:
@@ -38,7 +36,6 @@ permissions:
 jobs:
   verify:
     uses: RaselisonToky/paidwen-action/.github/workflows/verify.yml@v1
-    # The reusable workflow forwards only the five PAIDWEN_ secrets, and none to a fork.
     secrets: inherit
     with:
       verification: ${{ inputs.verification }}
