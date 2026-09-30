@@ -23,7 +23,8 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
   const params = await searchParams;
   const sort: InvoiceSort = single(params.sort) === 'amount' ? 'amount' : 'newest';
   const requested = Number.parseInt(single(params.page) ?? '1', 10) || 1;
-  const list = await load<InvoicePageDto>(`/invoices?sort=${sort}&page=${requested}`, userId);
+  const list = await load<InvoicePageDto>(`/invoices?page=${requested}`, userId);
+  const items = sort === 'amount' ? [...list.items].sort((a, b) => b.totalCents - a.totalCents) : list.items;
   return (
     <>
       <div className="page-header">
@@ -66,7 +67,7 @@ export default async function InvoicesPage({ searchParams }: { searchParams: Sea
               </tr>
             </thead>
             <tbody>
-              {list.items.map((invoice) => (
+              {items.map((invoice) => (
                 <tr key={invoice.id}>
                   <td>
                     <a href={`/invoices/${invoice.id}`}>{invoice.number}</a>
