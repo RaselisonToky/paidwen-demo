@@ -1,0 +1,29 @@
+{
+  "name": "@norbill/api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Norbill API: auth, clients, invoices, billing and export.",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start": "node dist/index.js",
+    "seed": "node dist/seed.js",
+    "db:generate": "drizzle-kit generate"
+  },
+  "dependencies": {
+    "@norbill/shared": "1.0.0",
+    "bullmq": "^5.81.5",
+    "drizzle-orm": "^0.45.3",
+    "fastify": "^5.12.5",
+    "ioredis": "^5.11.1",
+    "pg": "^8.23.0",
+    "stripe": "^22.6.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.0",
+    "@types/pg": "^8.23.1",
+    "drizzle-kit": "^0.31.11",
+    "typescript": "^5.9.3"
+  }
+}
