@@ -19,6 +19,7 @@ export async function createInvoice(executor: DbExecutor, workspaceId: string, i
       subtotalCents: totals.subtotalCents,
       taxCents: totals.taxCents,
       totalCents: totals.totalCents,
+      notes: input.notes ?? null,
     })
     .returning({ id: invoices.id });
   await executor.insert(invoiceLines).values(
@@ -64,6 +65,7 @@ export async function loadInvoice(workspaceId: string, invoiceId: string): Promi
       subtotalCents: invoices.subtotalCents,
       taxCents: invoices.taxCents,
       totalCents: invoices.totalCents,
+      notes: invoices.notes,
     })
     .from(invoices)
     .innerJoin(clients, eq(invoices.clientId, clients.id))

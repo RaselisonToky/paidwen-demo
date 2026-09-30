@@ -59,6 +59,7 @@ export const invoices = pgTable(
     subtotalCents: integer('subtotal_cents').notNull(),
     taxCents: integer('tax_cents').notNull(),
     totalCents: integer('total_cents').notNull(),
+    notes: text('notes'),
     sentAt: timestamp('sent_at', { withTimezone: true }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
