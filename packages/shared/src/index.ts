@@ -47,6 +47,17 @@ export interface InvoiceSummaryDto {
   status: InvoiceStatus;
 }
 
+export type InvoiceSort = 'newest' | 'amount';
+
+export const INVOICE_PAGE_SIZE = 5;
+
+export interface InvoicePageDto {
+  items: InvoiceSummaryDto[];
+  page: number;
+  pageCount: number;
+  total: number;
+}
+
 export interface InvoiceDto extends InvoiceSummaryDto {
   clientEmail: string;
   taxRate: number;

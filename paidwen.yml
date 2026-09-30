@@ -82,6 +82,22 @@ journeys:
       - click: Mark as sent
       - expect: { text: Invoice marked as sent }
 
+  - id: sort
+    name: Sort the invoices by amount
+    account: true
+    paths:
+      - apps/web/src/app/invoices/page.tsx
+      - apps/api/src/routes/invoices.ts
+      - apps/api/src/invoice-service.ts
+    steps:
+      - goto: /login
+      - fill: { field: Email, value: "{{account.email}}" }
+      - fill: { field: Password, value: "{{account.password}}" }
+      - click: Log in
+      - goto: /invoices
+      - click: Largest first
+      - expect: { text: "$5,936.40" }
+
   - id: subscribe
     name: Subscribe to Pro with a test card
     account: true
