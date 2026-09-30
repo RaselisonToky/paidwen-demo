@@ -38,6 +38,8 @@ permissions:
 jobs:
   verify:
     uses: RaselisonToky/paidwen-action/.github/workflows/verify.yml@v1
+    # The reusable workflow forwards only the five PAIDWEN_ secrets, and none to a fork.
+    secrets: inherit
     with:
       verification: ${{ inputs.verification }}
       pr: ${{ inputs.pr }}
