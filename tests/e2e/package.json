@@ -1,0 +1,13 @@
+{
+  "name": "@norbill/e2e",
+  "version": "1.0.0",
+  "private": true,
+  "description": "End-to-end journeys of Norbill, driven with Playwright against the Docker stack.",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^24.19.0"
+  }
+}
