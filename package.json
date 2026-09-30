@@ -1,0 +1,20 @@
+{
+  "name": "norbill",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Norbill, a small invoicing application for freelancers and small teams.",
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "tests/e2e"
+  ],
+  "scripts": {
+    "build": "npm run build -w packages/shared && npm run build -w apps/api -w apps/worker -w apps/web",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "seed": "npm run seed -w apps/api",
+    "test:e2e": "playwright test -c tests/e2e/playwright.config.ts"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}
