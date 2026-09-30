@@ -37,10 +37,14 @@ export async function POST(request: Request): Promise<Response> {
   const issuedAt = field(form, 'issuedAt') || new Date().toISOString().slice(0, 10);
   const taxRate = Number(field(form, 'taxRate') || '0');
   const lines = parseLines(form);
+  const notes = field(form, 'notes');
   if (!clientId || !lines || lines.length === 0 || !Number.isFinite(taxRate) || taxRate < 0 || taxRate > 100) {
     return seeOther('/invoices/new?error=invalid');
   }
   const body: NewInvoiceInput = { clientId, issuedAt, taxRate, lines };
+  if (notes) {
+    body.notes = notes;
+  }
   const response = await api<{ id?: string; error?: string }>('/invoices', { method: 'POST', body, userId });
   if (response.status === 401) {
     return seeOther('/login');

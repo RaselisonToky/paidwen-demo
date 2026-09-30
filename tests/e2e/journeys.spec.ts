@@ -119,6 +119,7 @@ test('the demo account creates a client and an invoice, marks it as sent and exp
   await page.getByLabel('Line 1 description').fill('Design work');
   await page.getByLabel('Line 1 quantity').fill('2');
   await page.getByLabel('Line 1 unit price').fill('150');
+  await page.getByLabel('Notes').fill('Payable within 30 days.');
   await page.getByRole('button', { name: 'Create invoice' }).click();
   await expect(page.getByText('Invoice created.')).toBeVisible();
 
@@ -127,6 +128,8 @@ test('the demo account creates a client and an invoice, marks it as sent and exp
   expect(number).toMatch(/^INV-\d{4}$/);
   await expect(page.getByTestId('invoice-status')).toHaveText('Draft');
   await expect(page.getByRole('cell', { name: '$360.00' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Notes' })).toBeVisible();
+  await expect(page.getByText('Payable within 30 days.')).toBeVisible();
 
   await page.getByRole('button', { name: 'Mark as sent' }).click();
   await expect(page.getByText('Invoice marked as sent.')).toBeVisible();

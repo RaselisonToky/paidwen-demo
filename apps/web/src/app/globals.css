@@ -169,7 +169,8 @@ label {
 }
 
 input,
-select {
+select,
+textarea {
   width: 100%;
   padding: 8px 10px;
   border: 1px solid var(--border);
@@ -179,8 +180,13 @@ select {
   color: inherit;
 }
 
+textarea {
+  resize: vertical;
+}
+
 input:focus,
 select:focus,
+textarea:focus,
 button:focus-visible,
 a:focus-visible {
   outline: 2px solid var(--primary);
@@ -299,6 +305,11 @@ tfoot td {
 
 .details dd {
   margin: 0;
+}
+
+.notes {
+  margin: 0;
+  white-space: pre-wrap;
 }
 
 .muted {

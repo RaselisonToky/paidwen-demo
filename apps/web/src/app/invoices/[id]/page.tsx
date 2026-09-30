@@ -83,6 +83,12 @@ export default async function InvoicePage({
           </tr>
         </tfoot>
       </table>
+      {invoice.notes ? (
+        <>
+          <h2>Notes</h2>
+          <p className="notes">{invoice.notes}</p>
+        </>
+      ) : null}
       <div className="spacer" />
       <div className="actions">
         {invoice.status === 'draft' ? (

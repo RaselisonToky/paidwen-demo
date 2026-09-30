@@ -64,6 +64,10 @@ export default async function NewInvoicePage({ searchParams }: { searchParams: S
               </div>
             </div>
           ))}
+          <div>
+            <label htmlFor="notes">Notes</label>
+            <textarea id="notes" name="notes" rows={3} maxLength={2000} />
+          </div>
           <div className="actions">
             <button type="submit" className="button">
               Create invoice
