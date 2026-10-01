@@ -153,5 +153,24 @@ journeys:
       - click: Create client
       - expect: { url: /clients, text: Client created }
 
+  - id: newest-invoice
+    name: Open the newest invoice
+    goal: Log in with the test account, open the invoices, and open the newest invoice.
+    account: true
+    steps:
+      - goto: /login
+      - fill: { field: { role: textbox, name: Email }, value: "{{account.email}}" }
+      - fill: { field: { role: textbox, name: Password }, value: "{{account.password}}" }
+      - click: { role: button, name: Log in }
+      - click: { role: link, name: Invoices }
+      - click: { role: link, name: INV-0008 }
+      - expect: { text: Training session }
+
+  - id: send-invoice
+    name: Mark the newest draft invoice as sent
+    account: true
+    goal: Log in with the test account, open the newest draft invoice, and mark it as sent.
+    expect: { text: Invoice marked as sent }
+
 settings:
   budgetMinutes: 20
