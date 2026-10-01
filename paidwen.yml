@@ -95,7 +95,7 @@ journeys:
       - fill: { field: Password, value: "{{account.password}}" }
       - click: Log in
       - goto: /invoices
-      - click: Largest first
+      - click: Highest amount first
       - expect: { text: "$5,936.40" }
 
   - id: subscribe
