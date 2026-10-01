@@ -3,7 +3,7 @@ import { load, requireUserId, single, type SearchParams } from '@/lib/api';
 
 const SORTS: Array<{ value: InvoiceSort; label: string }> = [
   { value: 'newest', label: 'Newest first' },
-  { value: 'amount', label: 'Largest first' },
+  { value: 'amount', label: 'Highest amount first' },
 ];
 
 function listUrl(sort: InvoiceSort, page: number): string {
