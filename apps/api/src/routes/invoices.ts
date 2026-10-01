@@ -1,6 +1,6 @@
 import type { FastifyPluginAsync } from 'fastify';
 import { and, eq } from 'drizzle-orm';
-import { formatMoney, INVOICE_PAGE_SIZE, STATUS_LABELS, toCsv, type InvoicePageDto, type InvoiceSort, type NewInvoiceInput } from '@norbill/shared';
+import { formatMoney, INVOICE_PAGE_SIZE, STATUS_LABELS, toCsv, type InvoicePageDto, type NewInvoiceInput } from '@norbill/shared';
 import { db } from '../db';
 import { clients, invoices } from '../schema';
 import { countInvoices, createInvoice, listInvoices, loadInvoice } from '../invoice-service';
@@ -37,13 +37,12 @@ const newInvoiceBody = {
 };
 
 export const invoiceRoutes: FastifyPluginAsync = async (app) => {
-  app.get<{ Querystring: { sort?: string; page?: string } }>('/invoices', async (request): Promise<InvoicePageDto> => {
+  app.get<{ Querystring: { page?: string } }>('/invoices', async (request): Promise<InvoicePageDto> => {
     const workspaceId = request.user.workspaceId;
-    const sort: InvoiceSort = request.query.sort === 'amount' ? 'amount' : 'newest';
     const total = await countInvoices(workspaceId);
     const pageCount = Math.max(1, Math.ceil(total / INVOICE_PAGE_SIZE));
     const page = Math.min(pageCount, Math.max(1, Number.parseInt(request.query.page ?? '1', 10) || 1));
-    const items = await listInvoices(workspaceId, sort, INVOICE_PAGE_SIZE, (page - 1) * INVOICE_PAGE_SIZE);
+    const items = await listInvoices(workspaceId, 'newest', INVOICE_PAGE_SIZE, (page - 1) * INVOICE_PAGE_SIZE);
     return { items, page, pageCount, total };
   });
 
