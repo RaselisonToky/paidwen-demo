@@ -69,9 +69,8 @@ export const workspaceRoutes: FastifyPluginAsync = async (app) => {
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       line_items: [{ price, quantity: 1 }],
-      client_reference_id: request.user.workspaceId,
       customer_email: request.user.email,
-      metadata: { workspaceId: request.user.workspaceId },
+      metadata: { workspace_id: request.user.workspaceId },
       success_url: `${APP_URL}/billing?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${APP_URL}/billing`,
     });
