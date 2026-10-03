@@ -72,7 +72,7 @@ Every variable has a default in `docker-compose.yml`, so no `.env` file is neede
 Web app (port 3000):
 
 - Pages: `/signup`, `/login`, `/dashboard`, `/clients`, `/clients/new`, `/invoices`, `/invoices/new`, `/invoices/:id`, `/billing`. `/` redirects to `/dashboard`.
-- Route handlers: `POST /api/signup`, `POST /api/login`, `POST /api/logout`, `GET /confirm?token=...`, `POST /api/clients`, `POST /api/invoices`, `GET /api/invoices/export` (the CSV), `POST /api/invoices/:id/send`, `POST /api/billing/checkout`, `POST /api/webhooks/stripe` (forwarded to the API), `GET /api/health`.
+- Route handlers: `POST /api/signup`, `POST /api/login`, `POST /api/logout`, `GET /confirm?token=...`, `POST /api/clients`, `POST /api/invoices`, `GET /api/invoices/export` (the CSV), `POST /api/invoices/:id/send`, `POST /api/billing/subscribe`, `POST /api/webhooks/stripe` (forwarded to the API), `GET /api/health`.
 
 API (port 4000, internal): `GET /health`, `POST /auth/signup`, `POST /auth/confirm`, `POST /auth/login`, `GET /me`, `GET /dashboard`, `GET /clients`, `POST /clients`, `GET /invoices?sort=newest|amount&page=N`, `GET /invoices/export`, `POST /invoices`, `GET /invoices/:id`, `POST /invoices/:id/send`, `GET /billing`, `POST /billing/checkout`, `POST /webhooks/stripe`.
 
