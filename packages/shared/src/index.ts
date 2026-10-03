@@ -64,6 +64,7 @@ export interface InvoiceDto extends InvoiceSummaryDto {
   subtotalCents: number;
   taxCents: number;
   lines: InvoiceLineDto[];
+  notes: string | null;
 }
 
 export interface NewInvoiceLine {
@@ -77,6 +78,7 @@ export interface NewInvoiceInput {
   issuedAt: string;
   taxRate: number;
   lines: NewInvoiceLine[];
+  notes?: string;
 }
 
 export interface BillingDto {

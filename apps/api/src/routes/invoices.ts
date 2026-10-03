@@ -19,6 +19,7 @@ const newInvoiceBody = {
     clientId: { type: 'string', format: 'uuid' },
     issuedAt: { type: 'string', pattern: '^\\d{4}-\\d{2}-\\d{2}$' },
     taxRate: { type: 'number', minimum: 0, maximum: 100 },
+    notes: { type: 'string', maxLength: 2000 },
     lines: {
       type: 'array',
       minItems: 1,
@@ -66,8 +67,10 @@ export const invoiceRoutes: FastifyPluginAsync = async (app) => {
     if (!client) {
       return reply.code(400).send({ error: 'unknown-client' });
     }
+    const notes = request.body.notes?.trim();
     const input: NewInvoiceInput = {
       ...request.body,
+      notes: notes || undefined,
       lines: request.body.lines.map((line) => ({ ...line, description: line.description.trim() })),
     };
     const invoiceId = await db.transaction((tx) => createInvoice(tx, workspaceId, input));
@@ -105,6 +108,7 @@ export const invoiceRoutes: FastifyPluginAsync = async (app) => {
         `Subtotal: ${formatMoney(invoice.subtotalCents)}`,
         `Tax (${invoice.taxRate}%): ${formatMoney(invoice.taxCents)}`,
         `Total: ${formatMoney(invoice.totalCents)}`,
+        ...(invoice.notes ? ['', invoice.notes] : []),
       ].join('\n'),
     });
     return { ...invoice, status: 'sent' };
